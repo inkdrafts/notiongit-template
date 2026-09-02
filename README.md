@@ -15,6 +15,18 @@ are synchronized from Notion and built by GitHub Pages.
 The browser output is HTML and CSS only. Dark mode follows the user's system
 preference through `prefers-color-scheme`; there is no client-side JavaScript.
 
+## Provisioning ownership
+
+`_config.yml` contains neutral metadata so the template can build before it is
+provisioned. The backend owns the site URL configuration and patches `url` and
+`baseurl` for the generated repository, including project-site paths. The
+Notion sync owns only the published site metadata fields `title` and
+`author.name`; it must not overwrite `url`, `baseurl`, or `author.email`.
+
+The neutral metadata contract is checked by
+`scripts/check-neutral-config.sh` and enforced in
+`.github/workflows/template-check.yml`.
+
 ## Branch and template contract
 
 This repository is configured as a GitHub template and uses `main` as its
@@ -62,6 +74,7 @@ Excluded from that revision:
 
 ```sh
 bundle install
+./scripts/check-neutral-config.sh
 bundle exec jekyll build
 git grep -n -i -E 'leandrollosa|leandro llosa|CNAME' -- . ':!README.md' || true
 git diff --check

@@ -1,5 +1,5 @@
-# Content-free defaults. The sync process replaces site-specific values from
-# the published home page in Notion.
+# Neutral template defaults. Provisioning patches url/baseurl; the Notion sync
+# may replace title and author.name from the published home page.
 title: "NotionGit"
 description: "A Notion-powered Jekyll site."
 url: ""
