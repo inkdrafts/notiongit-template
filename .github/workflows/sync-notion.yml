@@ -1,0 +1,44 @@
+name: Sync Notion → Jekyll
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+
+  workflow_dispatch:
+    inputs:
+      allow_bulk_delete:
+        description: >-
+          Let this run delete most of _pages/ and _posts/. Only enable this when
+          those rows were intentionally unpublished in Notion.
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    name: Fetch and publish posts
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Sync from Notion
+        id: sync
+        uses: inkdrafts/notiongit-sync@v1
+        with:
+          notion_token: ${{ secrets.NOTION_TOKEN }}
+          pages_database_id: ${{ secrets.NOTION_PAGES_DATABASE_ID }}
+          posts_database_id: ${{ secrets.NOTION_POSTS_DATABASE_ID }}
+          allow_bulk_delete: ${{ inputs.allow_bulk_delete }}
+
+      - name: Commit synced content
+        if: steps.sync.outputs.changed == 'true'
+        run: |
+          git config user.name "notiongit-sync"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A _pages _posts _data _config.yml
+          git commit -m "chore: sync from Notion" || exit 0
+          git push
