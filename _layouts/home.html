@@ -1,0 +1,28 @@
+---
+layout: default
+---
+{% assign home = site.data.home %}
+
+<div class="home-page">
+
+  {% if home.profile_picture and home.profile_picture != "" %}
+  <img
+    src="{{ home.profile_picture }}"
+    alt="{{ home.name }}"
+    class="home-avatar"
+    loading="eager"
+  >
+  {% else %}
+  <div class="home-avatar-placeholder" aria-hidden="true">
+    {{ home.name | slice: 0 | upcase }}
+  </div>
+  {% endif %}
+
+  <h1 class="home-name">{{ home.name | default: site.author.name | default: site.title }}</h1>
+
+  {% if home.tagline and home.tagline != "" %}
+  <p class="home-tagline">{{ home.tagline }}</p>
+  {% endif %}
+
+
+</div>

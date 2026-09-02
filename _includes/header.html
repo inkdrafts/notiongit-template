@@ -1,0 +1,17 @@
+<header class="site-header">
+  <div class="container">
+    <div class="header-inner">
+      {% if site.data.nav and site.data.nav.size > 0 %}
+      <nav class="site-nav" aria-label="Main navigation">
+        {% for item in site.data.nav %}
+        {% assign item_url = item.url | relative_url %}
+        {% assign is_active = false %}
+        {% if page.url == item_url %}{% assign is_active = true %}{% endif %}
+        {% if page.url contains item.url and item.url != "/" %}{% assign is_active = true %}{% endif %}
+        <a href="{{ item_url }}"{% if is_active %} aria-current="page"{% endif %}>{{ item.title }}</a>
+        {% endfor %}
+      </nav>
+      {% endif %}
+    </div>
+  </div>
+</header>

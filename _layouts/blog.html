@@ -1,0 +1,16 @@
+---
+layout: default
+---
+<div class="container">
+  {% if site.posts.size == 0 %}
+  <div class="empty-state">
+    <p>No posts yet. Publish posts in your Notion database to get started.</p>
+  </div>
+  {% else %}
+  <div class="posts-list">
+    {% for post in site.posts %}
+      {% include post-card.html post=post %}
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
