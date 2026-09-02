@@ -11,9 +11,11 @@ permalink: /tags/
   {% assign tags_list = site.tags | sort %}
 
   {% if tags_list.size == 0 %}
-  <div class="empty-state">
-    <p>No tags yet. Add tags to your Notion posts to organize them here.</p>
-  </div>
+  {% include empty-state.html
+    kicker="NOTION TAGS"
+    title="Your tags will appear here"
+    copy="Tags from your published posts will be collected here automatically."
+  %}
   {% else %}
   {% for tag in tags_list %}
   {% assign tag_name = tag[0] %}

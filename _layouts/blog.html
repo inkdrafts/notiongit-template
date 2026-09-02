@@ -2,10 +2,16 @@
 layout: default
 ---
 <div class="container">
+  <header class="blog-header">
+    <h1 class="page-title">{{ page.title | default: "Blog" }}</h1>
+  </header>
+
   {% if site.posts.size == 0 %}
-  <div class="empty-state">
-    <p>No posts yet. Publish posts in your Notion database to get started.</p>
-  </div>
+  {% include empty-state.html
+    kicker="NOTION POSTS"
+    title="Your posts will appear here"
+    copy="Published posts will show up automatically after your first sync completes."
+  %}
   {% else %}
   <div class="posts-list">
     {% for post in site.posts %}
