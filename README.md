@@ -15,6 +15,14 @@ are synchronized from Notion and built by GitHub Pages.
 The browser output is HTML and CSS only. Dark mode follows the user's system
 preference through `prefers-color-scheme`; there is no client-side JavaScript.
 
+## Branch and template contract
+
+This repository is configured as a GitHub template and uses `main` as its
+default branch. Repositories generated from it must also start on `main`.
+Provisioning and workflow configuration should treat `main` as the target
+branch for repository setup, synchronized content, and future GitHub Actions
+references.
+
 ## Source and migration record
 
 The presentation layer was imported from
