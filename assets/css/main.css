@@ -748,13 +748,100 @@ img, video {
 
 /* ─── Empty state ────────────────────────────────────────────── */
 .empty-state {
-  padding: var(--s-16) 0;
+  width: 100%;
+  max-width: 34rem;
+  margin: 0 auto;
+  padding: var(--s-12) var(--s-8);
   text-align: center;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.empty-state-mark {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 5px;
+  height: 2.25rem;
+  margin-bottom: var(--s-6);
+}
+
+.empty-state-mark span {
+  display: block;
+  width: 7px;
+  border-radius: 99px;
+  background: var(--accent);
+}
+
+.empty-state-mark span:nth-child(1) {
+  height: 1rem;
+  opacity: 0.45;
+}
+
+.empty-state-mark span:nth-child(2) {
+  height: 1.5rem;
+  opacity: 0.7;
+}
+
+.empty-state-mark span:nth-child(3) {
+  height: 2rem;
+}
+
+.empty-state-kicker {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+}
+
+.empty-state-title {
+  margin-top: var(--s-2);
+  font-size: clamp(1.35rem, 4vw, 1.7rem);
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.03em;
+  color: var(--text);
+}
+
+.empty-state-copy {
+  max-width: 27rem;
+  margin: var(--s-3) auto 0;
+  font-size: 0.98rem;
+  line-height: 1.65;
+}
+
+.empty-state-note {
+  margin-top: var(--s-6);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
   color: var(--text-muted);
 }
 
-.empty-state p {
-  font-size: 1.05rem;
+.home-empty-state {
+  border: 0;
+  background: transparent;
+  padding: var(--s-8) var(--s-6);
+}
+
+.site-nav-empty {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--s-2) var(--s-4);
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.site-nav-empty-title {
+  font-weight: 700;
+  color: var(--text);
 }
 
 /* ─── Site footer ────────────────────────────────────────────── */
@@ -801,6 +888,10 @@ img, video {
 
   .container {
     padding: 0 var(--s-4);
+  }
+
+  .empty-state {
+    padding: var(--s-8) var(--s-4);
   }
 
   .post-title {
