@@ -96,3 +96,11 @@ bundle install
 bundle exec jekyll build
 git diff --check
 ```
+
+## Cold-clone acceptance test
+
+Local checks can't verify template generation, default branch, Actions
+behavior with no secrets, or the real GitHub Pages deployment. See
+[`docs/cold-clone-acceptance-test.md`](docs/cold-clone-acceptance-test.md)
+and `scripts/cold-clone-acceptance-test.sh` for the repeatable procedure and
+recorded evidence.
