@@ -3,6 +3,26 @@
 This repository is your website. Edit the content in Notion; GitHub Actions
 copies published pages and posts here, and GitHub Pages publishes the result.
 
+The reusable template code is released under the [MIT License](LICENSE). See
+[`CONTRIBUTING.md`](CONTRIBUTING.md) for maintainer setup, generated-file
+boundaries, validation commands, and security reporting.
+
+## Licensing and generated content
+
+The MIT license covers the reusable template code, including the layouts,
+includes, stylesheet, and generic configuration. It is compatible with the
+MIT-licensed presentation layer imported from the source revision documented
+in the repository history. The directly declared Jekyll/GitHub Pages
+dependencies are separate components and retain their own licenses and
+notices.
+
+Repositories generated from this template are not automatically covered by
+one license. The person or organization using the template retains rights to
+content they provide or sync from Notion, including posts, pages, metadata,
+and media. That content is not automatically relicensed under MIT. Generated
+site owners may customize and redistribute the template code under MIT while
+preserving the copyright and license notice and honoring third-party terms.
+
 ## Start here
 
 ### Publish something
