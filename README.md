@@ -3,17 +3,36 @@
 A content-free Jekyll template for sites whose pages, navigation, and posts
 are synchronized from Notion and built by GitHub Pages.
 
+The reusable template code is released under the [MIT License](LICENSE). See
+[`CONTRIBUTING.md`](CONTRIBUTING.md) for maintainer setup, generated-file
+boundaries, validation commands, and security reporting.
+
 ## What is included
 
 - Reusable HTML layouts in `_layouts/` and includes in `_includes/`.
 - The source stylesheet in `assets/css/main.css`.
 - Empty `_data/`, `_pages/`, `_posts/`, and `assets/img/` directories kept in
   Git with `.gitkeep` placeholders for sync-managed output and media.
-- Minimal `index.html`, `tags.html`, `Gemfile`, `.gitignore`, and a generic
-  `_config.yml` using only GitHub Pages safe-mode plugins.
+- Minimal `index.html`, `tags.html`, `Gemfile`, `.gitignore`, `LICENSE`, and a
+  generic `_config.yml` using only GitHub Pages safe-mode plugins.
 
 The browser output is HTML and CSS only. Dark mode follows the user's system
 preference through `prefers-color-scheme`; there is no client-side JavaScript.
+
+## Licensing and generated content
+
+The MIT license covers the reusable template code, including the layouts,
+includes, stylesheet, and generic configuration. It is compatible with the
+MIT-licensed presentation layer imported from the source revision recorded
+below. The directly declared Jekyll/GitHub Pages dependencies are separate
+components and retain their own licenses and notices.
+
+Repositories generated from this template are not all automatically covered
+by one license. The person or organization using the template retains rights
+to content they provide or sync from Notion, including posts, pages, metadata,
+and media. That content is not automatically relicensed under MIT. Generated
+site owners may customize and redistribute the template code under MIT while
+preserving the copyright and license notice and honoring third-party terms.
 
 ## Provisioning ownership
 
@@ -87,7 +106,7 @@ Excluded from that revision:
   or custom-domain assets: these identify or belong to the source site.
 - `assets/happy-birthday-lisi.png`, `assets/index-DNfK9NH7.js`, and
   `assets/index-k1yVDfyq.css`: unrelated generated application assets.
-- `CLAUDE.md`, `LICENSE`, `package.json`, `package-lock.json`, `robots.txt`,
+- `CLAUDE.md`, the source `LICENSE` file, `package.json`, `package-lock.json`, `robots.txt`,
   and `sitemap.xml`: not required by this template bootstrap.
 - The source `README.md`: replaced with this template-specific migration and
   verification record.
