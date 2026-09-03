@@ -1,115 +1,234 @@
-# NotionGit template
+# Your Notion site
 
-A content-free Jekyll template for sites whose pages, navigation, and posts
-are synchronized from Notion and built by GitHub Pages.
+This repository is your website. Edit the content in Notion; GitHub Actions
+copies published pages and posts here, and GitHub Pages publishes the result.
 
-## What is included
+## Start here
 
-- Reusable HTML layouts in `_layouts/` and includes in `_includes/`.
-- The source stylesheet in `assets/css/main.css`.
-- Empty `_data/`, `_pages/`, `_posts/`, and `assets/img/` directories kept in
-  Git with `.gitkeep` placeholders for sync-managed output and media.
-- Minimal `index.html`, `tags.html`, `Gemfile`, `.gitignore`, and a generic
-  `_config.yml` using only GitHub Pages safe-mode plugins.
+### Publish something
 
-The browser output is HTML and CSS only. Dark mode follows the user's system
-preference through `prefers-color-scheme`; there is no client-side JavaScript.
+1. Open the Pages or Posts database in your connected Notion workspace.
+2. Edit a row while its `Status` is `Draft`.
+3. When it is ready, change `Status` to `Published`.
+4. Wait for the next sync. The scheduled sync runs about every ten minutes.
+5. Open the live-site link shown in your repository's **Settings → Pages**.
 
-## Provisioning ownership
+Posts use `Publish Date` to control their date; if it is blank, the sync uses
+today's date. A page or post can be published without being added to the
+navigation; for pages, check `Show in Nav` when you want it in the header. Keep
+each `Slug` unique and URL-safe because it becomes part of the page URL.
 
-`_config.yml` contains neutral metadata so the template can build before it is
-provisioned. The backend owns the site URL configuration and patches `url` and
-`baseurl` for the generated repository, including project-site paths. The
-Notion sync owns only the published site metadata fields `title` and
-`author.name`; it must not overwrite `url`, `baseurl`, or `author.email`.
+The first sync may take a little longer than ten minutes because GitHub must
+run the Action and rebuild the Pages site. A scheduled run can also be delayed
+by GitHub Actions. The repository remains the source of truth for the site,
+and it continues to work if InkDrafts is unavailable after provisioning.
 
-The neutral metadata contract is checked by
-`scripts/check-neutral-config.sh` and enforced in
-`.github/workflows/template-check.yml`. That check only runs when
-`github.repository == 'inkdrafts/notiongit-template'` — it asserts an
-invariant of this repository, not of sites generated from it, which
-legitimately have non-empty `url`/`baseurl`/`title`/`author.name` once
-provisioned and synced.
+### What the sync changes
 
-## Template hygiene
+The Action synchronizes these files from Notion:
 
-CI rejects personal content and unsafe template artifacts before they can be
-merged: a `CNAME` file, anything other than the documented `.gitkeep`
-placeholder in `_pages/`, `_posts/`, or `_data/` (all sync-managed output),
-source-site domain or identity strings, private AI-assistant files (for
-example `CLAUDE.md`, `.claude/`, `AGENTS.md`, `.cursor/`), and obvious secret
-patterns (API tokens, private key blocks). The scanner only inspects
-tracked/staged files, reports the offending path and rule instead of any
-matched secret value, and allowlists reusable docs by exact path rather than
-excluding whole directories.
+- `_pages/` — published Pages rows, except the `home` row.
+- `_posts/` — published Posts rows.
+- `_data/home.yml` — home-page profile and biography.
+- `_data/nav.yml` — navigation items.
+- `_config.yml` — only the site `title` and `author.name` lines.
 
-This is enforced by `scripts/check-hygiene.sh` (the scanner) and
-`scripts/test-hygiene.sh` (fixture tests proving each forbidden artifact is
-rejected), both run in `.github/workflows/template-check.yml`. Like the
-neutral-config check, `check-hygiene.sh` only runs against
-`inkdrafts/notiongit-template` itself — a synced site's `_pages/_posts/_data`
-content is exactly what rule 2 above would otherwise reject.
-`test-hygiene.sh`'s fixtures don't depend on repo state, so it still runs
-everywhere.
+Do not edit those generated files by hand. Your next sync can overwrite them.
+Edit the corresponding Notion row instead. Provisioning owns `_config.yml`'s
+`url` and `baseurl`; do not replace them with a custom value unless you are
+manually maintaining the site.
 
-## Branch and template contract
+### Check sync status or run it again
 
-This repository is configured as a GitHub template and uses `main` as its
-default branch. Repositories generated from it must also start on `main`.
-Provisioning and workflow configuration should treat `main` as the target
-branch for repository setup, synchronized content, and future GitHub Actions
-references.
+Open the repository's **Actions** tab and choose **Sync Notion → Jekyll**.
+Each run shows whether content changed and includes a short run summary.
 
-## Source and migration record
+To sync immediately, select **Run workflow** on that workflow. Leave
+`allow_bulk_delete` turned off for normal use. The workflow is also available
+as a scheduled run, so a manual run is usually only needed after an important
+publish or when troubleshooting.
 
-The presentation layer was imported from
-`leandro-llosa/leandro-llosa.github.io` at master revision
-`c0166c0367e8595d7ee6f60b79f7a549926e0cb7`.
+If a run is red, open the run and read the failed step. A missing token or
+database ID is treated as a safe, green no-op before any files are changed;
+other failures need attention before retrying. Do not put a Notion token or
+private workspace content in an issue, log, or support message.
 
-Included from that revision:
+### Bulk-delete protection and recovery
 
-- `_layouts/`, `_includes/`, and `assets/css/main.css` for reusable
-  presentation.
-- `index.html`, `tags.html`, and `Gemfile` for the Jekyll entry points and
-  GitHub Pages dependencies.
-- The structural `_config.yml` settings: Markdown, permalink, timezone,
-  pages collection, defaults, safe-mode plugins, feed, and build exclusions.
-- `.gitignore` and empty directory placeholders needed for local builds and
-  future synchronization.
+The sync protects the repository from a damaged or incomplete Notion response.
+It stops before deleting files when Notion reports no published rows while
+tracked generated files exist, or when a run would delete an unusually large
+share of generated files. The normal workflow then makes no commit.
 
-Excluded from that revision:
+If that stop was unexpected:
 
-- `.github/workflows/sync-notion.yml` and `scripts/sync-notion.js`: workflow
-  and sync implementation are separate issues.
-- `_data/home.yml`, `_data/nav.yml`, `_pages/*`, and `_posts/*`: generated
-  output and personal content; only empty placeholders are retained.
-- `CNAME`, `about.md`, `birthday-lisi-25/`, `leandrollosa.com/`, and personal
-  or custom-domain assets: these identify or belong to the source site.
-- `assets/happy-birthday-lisi.png`, `assets/index-DNfK9NH7.js`, and
-  `assets/index-k1yVDfyq.css`: unrelated generated application assets.
-- `CLAUDE.md`, `LICENSE`, `package.json`, `package-lock.json`, `robots.txt`,
-  and `sitemap.xml`: not required by this template bootstrap.
-- The source `README.md`: replaced with this template-specific migration and
-  verification record.
-- Personal values in `_config.yml`: replaced with generic, empty defaults.
-- The source theme-toggle script and its button: removed to keep generated
-  pages free of client-side JavaScript; CSS system dark mode remains.
+1. Confirm the Notion integration is still connected to both databases.
+2. Confirm the intended rows still have `Status: Published`.
+3. Restore any accidentally removed `Slug`, `Publish Date`, or database
+   access, then run the workflow again.
 
-## Verify locally
+Only enable `allow_bulk_delete` when you intentionally unpublished most or all
+of the generated content and have checked the result in Notion. If an unwanted
+sync commit was already made, use the repository's Git history to identify it
+and revert it, then correct Notion and run a fresh sync. Generated files should
+not become a second, conflicting source of truth.
+
+### Images
+
+Use stable, externally hosted image URLs for profile pictures, cover images,
+and images in page or post content. Notion-hosted file URLs expire, so an image
+that works immediately after publishing can later disappear. Never paste a
+private URL or a credential into a public page.
+
+### Custom domains
+
+A custom domain is configured on the generated repository, not in this
+template. In **Settings → Pages**, enter the domain under **Custom domain** and
+follow GitHub's verification instructions. Configure DNS as GitHub documents:
+an apex domain uses the GitHub Pages A/AAAA records, while a subdomain such as
+`www.example.com` uses a CNAME to the Pages hostname shown by GitHub.
+
+Do not add a `CNAME` file to this template. GitHub Pages and provisioning own
+that setting for the generated repository. See GitHub's [custom domain
+documentation](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site).
+
+## Manual setup (developers)
+
+InkDrafts normally performs these steps for you. Use this appendix if you are
+installing the template without the provisioning service.
+
+### 1. Generate the repository
+
+Create a public repository from the template using GitHub's **Use this
+template** button, or with GitHub CLI:
+
+```sh
+gh repo create OWNER/REPOSITORY --template inkdrafts/notiongit-template --public
+```
+
+Keep the generated repository's default branch as `main`. The template is
+intentionally neutral: it contains no personal posts, pages, custom domain,
+Notion data, or Notion-hosted image URLs.
+
+### 2. Create and share the Notion databases
+
+Create one Pages database and one Posts database in Notion, then share both
+with the Notion integration that will perform the sync. The database names do
+not matter; the property names and types do.
+
+Pages database:
+
+| Property | Type | Notes |
+| --- | --- | --- |
+| `Title` | Title | Page name and heading |
+| `Slug` | Rich text | URL-safe path segment; defaults from the title |
+| `Type` | Select | `home`, `blog-list`, `blog`, or `markdown` |
+| `Nav Order` | Number | Lower numbers appear first |
+| `Show in Nav` | Checkbox | Adds the page to site navigation |
+| `Status` | Select | The row must be `Published` to sync; use `Draft` while editing |
+| `Description` | Rich text | Optional page description |
+| `Name` | Rich text | Home display name; also sets site title and author name |
+| `Profile Picture` | Rich text | Home profile image URL; use an external URL |
+| `Tagline` | Rich text | Optional home-page tagline |
+| `Social Links` | Rich text | One `Name: URL` pair per line |
+
+Posts database:
+
+| Property | Type | Notes |
+| --- | --- | --- |
+| `Title` | Title | Post title |
+| `Slug` | Rich text | URL-safe post slug; defaults from the title |
+| `Status` | Select | The row must be `Published` to sync |
+| `Publish Date` | Date | Used for the post date and filename |
+| `Tags` | Multi-select | Optional post tags |
+| `Description` | Rich text | Optional excerpt |
+| `Cover Image` | Files & media | Prefer an external image URL because Notion file URLs expire |
+| `Canonical URL` | URL | Optional canonical link |
+| `Featured` | Checkbox | Optional featured flag |
+
+The sync also reads the page body. A Pages row with `Type: home` supplies the
+home biography; other Pages rows become site pages. A Posts row becomes a blog
+post. The action accepts common capitalization and a few legacy aliases, but
+the names above are the recommended schema.
+
+### 3. Add repository secrets
+
+Create a Notion integration, copy its token through a secure prompt, and make
+sure it has access to the databases. Add these GitHub Actions secrets under
+**Settings → Secrets and variables → Actions**:
+
+| Secret | Value |
+| --- | --- |
+| `NOTION_TOKEN` | The integration token |
+| `NOTION_PAGES_DATABASE_ID` | The Pages database ID |
+| `NOTION_POSTS_DATABASE_ID` | The Posts database ID |
+
+At least one database ID is required alongside `NOTION_TOKEN`; using both is
+recommended. A posts-only installation may use the legacy
+`NOTION_DATABASE_ID` name instead of `NOTION_POSTS_DATABASE_ID`.
+
+With GitHub CLI, set each value interactively so tokens do not appear in shell
+history or command output:
+
+```sh
+gh secret set NOTION_TOKEN --repo OWNER/REPOSITORY
+gh secret set NOTION_PAGES_DATABASE_ID --repo OWNER/REPOSITORY
+gh secret set NOTION_POSTS_DATABASE_ID --repo OWNER/REPOSITORY
+```
+
+### 4. Configure GitHub Pages
+
+In the generated repository, open **Settings → Pages** and select:
+
+- **Source:** Deploy from a branch
+- **Branch:** `main`
+- **Folder:** `/ (root)`
+
+For a project site, set the URL values in `_config.yml` before the first build:
+
+```yaml
+url: "https://OWNER.github.io"
+baseurl: "/REPOSITORY"
+```
+
+Use `baseurl: ""` for a user site named `OWNER.github.io`. InkDrafts sets these
+values during provisioning; a manual installation must set them itself so
+stylesheet and page links work under a project-site path.
+
+This template is built with GitHub Pages' Jekyll environment and the
+`github-pages` gem. The included workflow writes synchronized files to `main`;
+Pages then builds that branch. The site's URL appears in the Pages settings.
+For a user site it normally follows `https://OWNER.github.io/`; for a project
+site it normally follows `https://OWNER.github.io/REPOSITORY/`.
+
+The workflow uses the reusable
+[`inkdrafts/notiongit-sync@v1`](https://github.com/inkdrafts/notiongit-sync)
+Action and needs write permission for repository contents. The checked-in
+workflow is the complete configuration; do not add a second sync workflow.
+
+### 5. Local verification
+
+From a checkout with Ruby and Bundler installed:
 
 ```sh
 bundle install
-./scripts/test-hygiene.sh
-./scripts/check-hygiene.sh
 ./scripts/check-neutral-config.sh
+./scripts/check-hygiene.sh
 bundle exec jekyll build
 git diff --check
 ```
 
-## Cold-clone acceptance test
+The build creates `_site/`, which is ignored and should not be committed.
 
-Local checks can't verify template generation, default branch, Actions
-behavior with no secrets, or the real GitHub Pages deployment. See
-[`docs/cold-clone-acceptance-test.md`](docs/cold-clone-acceptance-test.md)
-and `scripts/cold-clone-acceptance-test.sh` for the repeatable procedure and
-recorded evidence.
+## Help and service status
+
+For product information and InkDrafts support, visit
+[inkdrafts.com](https://inkdrafts.com/). For this public template's technical
+questions, use the [template issue tracker](https://github.com/inkdrafts/notiongit-template/issues).
+For GitHub platform incidents, check [GitHub
+Status](https://www.githubstatus.com/); for a site-specific result, check the
+repository's Actions and Pages screens first.
+
+After provisioning, your site is an ordinary repository and GitHub Pages site
+in your account. It does not require InkDrafts to keep serving content; these
+links are support and troubleshooting references, not runtime dependencies.
