@@ -27,6 +27,22 @@ The neutral metadata contract is checked by
 `scripts/check-neutral-config.sh` and enforced in
 `.github/workflows/template-check.yml`.
 
+## Template hygiene
+
+CI rejects personal content and unsafe template artifacts before they can be
+merged: a `CNAME` file, anything other than the documented `.gitkeep`
+placeholder in `_pages/`, `_posts/`, or `_data/` (all sync-managed output),
+source-site domain or identity strings, private AI-assistant files (for
+example `CLAUDE.md`, `.claude/`, `AGENTS.md`, `.cursor/`), and obvious secret
+patterns (API tokens, private key blocks). The scanner only inspects
+tracked/staged files, reports the offending path and rule instead of any
+matched secret value, and allowlists reusable docs by exact path rather than
+excluding whole directories.
+
+This is enforced by `scripts/check-hygiene.sh` (the scanner) and
+`scripts/test-hygiene.sh` (fixture tests proving each forbidden artifact is
+rejected), both run in `.github/workflows/template-check.yml`.
+
 ## Branch and template contract
 
 This repository is configured as a GitHub template and uses `main` as its
@@ -74,8 +90,9 @@ Excluded from that revision:
 
 ```sh
 bundle install
+./scripts/test-hygiene.sh
+./scripts/check-hygiene.sh
 ./scripts/check-neutral-config.sh
 bundle exec jekyll build
-git grep -n -i -E 'leandrollosa|leandro llosa|CNAME' -- . ':!README.md' || true
 git diff --check
 ```

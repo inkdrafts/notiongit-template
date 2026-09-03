@@ -34,7 +34,8 @@ if grep -Eiq 'leandrollosa|leandro[[:space:]-]+llosa' "$config_file"; then
 fi
 
 if git grep -n -i -E 'leandrollosa|leandro[[:space:]-]+llosa' -- . \
-  ':!README.md' ':!scripts/check-neutral-config.sh'; then
+  ':!README.md' ':!scripts/check-neutral-config.sh' \
+  ':!scripts/check-hygiene.sh' ':!scripts/test-hygiene.sh'; then
   echo "Personal identity or domain found outside documentation." >&2
   failures=1
 fi
