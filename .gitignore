@@ -24,3 +24,16 @@ Gemfile.lock
 # OS
 .DS_Store
 Thumbs.db
+
+# Private AI-assistant files — never commit these (see scripts/check-hygiene.sh)
+CLAUDE.md
+.claude/
+AGENTS.md
+.cursor/
+.cursorrules
+.codex/
+.windsurfrules
+.aider.conf.yml
+.aider.chat.history.md
+.aider.input.history
+.github/copilot-instructions.md
