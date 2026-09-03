@@ -25,7 +25,11 @@ Notion sync owns only the published site metadata fields `title` and
 
 The neutral metadata contract is checked by
 `scripts/check-neutral-config.sh` and enforced in
-`.github/workflows/template-check.yml`.
+`.github/workflows/template-check.yml`. That check only runs when
+`github.repository == 'inkdrafts/notiongit-template'` — it asserts an
+invariant of this repository, not of sites generated from it, which
+legitimately have non-empty `url`/`baseurl`/`title`/`author.name` once
+provisioned and synced.
 
 ## Template hygiene
 
@@ -41,7 +45,12 @@ excluding whole directories.
 
 This is enforced by `scripts/check-hygiene.sh` (the scanner) and
 `scripts/test-hygiene.sh` (fixture tests proving each forbidden artifact is
-rejected), both run in `.github/workflows/template-check.yml`.
+rejected), both run in `.github/workflows/template-check.yml`. Like the
+neutral-config check, `check-hygiene.sh` only runs against
+`inkdrafts/notiongit-template` itself — a synced site's `_pages/_posts/_data`
+content is exactly what rule 2 above would otherwise reject.
+`test-hygiene.sh`'s fixtures don't depend on repo state, so it still runs
+everywhere.
 
 ## Branch and template contract
 
