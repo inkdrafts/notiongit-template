@@ -107,7 +107,7 @@ an artifact of the test setup** — it's fixed now, but flagging it here since
 nothing in notiongit-template's own CI would have caught it before this
 acceptance test ran.
 
-### Finding 2 — `template-check.yml`'s neutral-config check breaks on any real provisioned site (follow-up needed)
+### Finding 2 — `template-check.yml`'s neutral-config and hygiene checks broke on any real provisioned site (fixed)
 
 `scripts/check-neutral-config.sh`, run by `.github/workflows/template-check.yml`
 on every push to `main`, requires `_config.yml`'s `url:` and `baseurl:`
@@ -118,25 +118,43 @@ initial commit like everything else. Real provisioning **must** patch
 `url`/`baseurl` to a non-empty value (that's the entire point of the
 `_config.yml` comment and README's "Provisioning ownership" section), so on
 every real generated site, the very first push after provisioning — and
-every subsequent Notion sync commit — will make `template-check.yml`'s
-"Check neutral configuration" step fail permanently.
+every subsequent Notion sync commit (which also rewrites `title` and
+`author.name`, two more fields the check pins to literal defaults) — would
+make `template-check.yml`'s "Check neutral configuration" step fail
+permanently.
 
 Confirmed directly: patching `_config.yml` in the disposable repo (the
 `--simulate-provisioning` step) triggered a new `template-check.yml` run
 that failed at "Check neutral configuration"
 ([run 33698743304](https://github.com/inkdrafts/notiongit-template-coldclone-20260902/actions/runs/33698743304)),
 while `pages build and deployment` succeeded regardless — GitHub Pages'
-legacy build is independent of Actions status, so this does **not** block
-the "GitHub Pages reaches a successful deployment" criterion, but it does
-mean every real deployed site ends up with a permanently red "Template
-checks" workflow in its Actions tab, which is a poor signal for both
-InkDrafts support and the end user.
+legacy build is independent of Actions status, so this did **not** block
+the "GitHub Pages reaches a successful deployment" criterion, but it did
+mean every real deployed site ended up with a permanently red "Template
+checks" workflow in its Actions tab. `scripts/check-hygiene.sh`'s rule 2
+(sync-managed `_pages`/`_posts`/`_data` may only hold `.gitkeep`) has the
+identical flaw for the same reason: a real Notion sync writes exactly the
+content that rule forbids.
 
 Filed as
-[notiongit-template#17](https://github.com/inkdrafts/notiongit-template/issues/17) —
-out of scope to fix here since it requires a maintainer decision (e.g. strip
-`template-check.yml` during provisioning, or narrow the neutral-config check
-to only the fields that stay neutral post-provisioning).
+[notiongit-template#17](https://github.com/inkdrafts/notiongit-template/issues/17),
+then fixed directly: `template-check.yml`'s "Check template hygiene" and
+"Check neutral configuration" steps now carry
+`if: github.repository == 'inkdrafts/notiongit-template'`, so they still
+gate this repository's own `main` but no longer run at all in a generated
+repository. "Build site" (the Jekyll build) and the hygiene scanner's own
+fixture tests stay unconditional — they don't depend on url/baseurl or
+sync-managed content, so they're still a real, useful signal on generated
+sites.
+
+Confirmed live on the disposable repo: it predates
+[#15](https://github.com/inkdrafts/notiongit-template/pull/15) (the hygiene
+checks merged after it was generated), so only the neutral-config guard was
+directly verifiable there — pushing the guarded workflow alongside the
+still-patched, non-neutral `_config.yml` produced a green
+`template-check.yml` run with "Check neutral configuration" correctly
+skipped and "Build site" still passing
+([run 33699949118](https://github.com/inkdrafts/notiongit-template-coldclone-20260902/actions/runs/33699949118)).
 
 ## Cleanup
 

@@ -19,10 +19,23 @@ jobs:
       - name: Run hygiene fixture tests
         run: ./scripts/test-hygiene.sh
 
+      # check-hygiene.sh and check-neutral-config.sh assert invariants that
+      # only hold for this template repository itself: sync-managed
+      # directories must be empty, and _config.yml's title/description/url/
+      # baseurl/author fields must stay literally neutral. A real generated
+      # site legitimately violates both once provisioning patches url/
+      # baseurl and the Notion sync writes _pages/_posts/_data content and
+      # replaces title/author.name -- that's the whole point of sync. Scope
+      # these two checks to the template repository so a provisioned site's
+      # Actions tab doesn't go permanently red for behaving as designed; the
+      # Jekyll build below still runs everywhere, since a real build failure
+      # is a real signal regardless of which repo it's in.
       - name: Check template hygiene
+        if: github.repository == 'inkdrafts/notiongit-template'
         run: ./scripts/check-hygiene.sh
 
       - name: Check neutral configuration
+        if: github.repository == 'inkdrafts/notiongit-template'
         run: ./scripts/check-neutral-config.sh
 
       - name: Set up Ruby
