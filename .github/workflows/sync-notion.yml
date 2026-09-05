@@ -27,12 +27,27 @@ jobs:
 
       - name: Sync from Notion
         id: sync
-        uses: inkdrafts/notiongit-sync@v1
+        uses: inkdrafts/notiongit-sync@v2
         with:
           notion_token: ${{ secrets.NOTION_TOKEN }}
           pages_database_id: ${{ secrets.NOTION_PAGES_DATABASE_ID }}
           posts_database_id: ${{ secrets.NOTION_POSTS_DATABASE_ID }}
           allow_bulk_delete: ${{ inputs.allow_bulk_delete }}
+
+      # The sync Action writes its run summary JSON to run-summary.json under
+      # runner.temp on every terminal run (success, no-op, or failure).
+      # Uploading it here makes that summary readable after the run through
+      # the Actions artifacts API — see docs/run-summary-schema.md in
+      # inkdrafts/notiongit-sync. always() covers the runs that exit 1; the
+      # channel is observational, so a missing file must never fail this job.
+      - name: Upload run summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: notiongit-run-summary
+          path: ${{ runner.temp }}/run-summary.json
+          if-no-files-found: ignore
+          overwrite: true
 
       - name: Commit synced content
         if: steps.sync.outputs.changed == 'true'
