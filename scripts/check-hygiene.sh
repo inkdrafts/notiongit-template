@@ -176,10 +176,12 @@ for rel in "${TRACKED_FILES[@]}"; do
   done < "$target/$rel"
 done
 
-# 7. The README's documented pin for inkdrafts/notiongit-sync must match the
-# actual pin in the workflow, so a version bump can't update one and leave
-# the other silently disagreeing (the hygiene scan only reads workflows).
+# 7. The README's documented pin and version label for inkdrafts/notiongit-sync
+# must match the workflow's actual pin and version comment, so a version bump
+# can't update one and leave the other silently disagreeing (the hygiene scan
+# only reads workflows).
 workflow_sync_sha=""
+workflow_sync_version=""
 for rel in "${TRACKED_FILES[@]}"; do
   case "$rel" in
     .github/workflows/*.yml|.github/workflows/*.yaml) ;;
@@ -188,19 +190,32 @@ for rel in "${TRACKED_FILES[@]}"; do
   while IFS= read -r line; do
     [[ "$line" =~ uses:[[:space:]]*[\'\"]?inkdrafts/notiongit-sync@([0-9a-fA-F]{40}) ]] || continue
     workflow_sync_sha="${BASH_REMATCH[1]}"
+    if [[ "$line" =~ \#[[:space:]]*(v[0-9]+(\.[0-9]+)+) ]]; then
+      workflow_sync_version="${BASH_REMATCH[1]}"
+    else
+      # Rule 6 reports a missing version comment; clear it here so this pin is
+      # not compared against a version carried over from an earlier line.
+      workflow_sync_version=""
+    fi
   done < "$target/$rel"
 done
 
 if [[ -n "$workflow_sync_sha" ]]; then
   readme_sync_sha=""
+  readme_sync_version=""
   if [[ -f "$target/README.md" ]]; then
-    match="$(grep -oE 'pinned to commit `[0-9a-fA-F]{40}`' "$target/README.md" | head -n1 || true)"
-    [[ -n "$match" ]] && readme_sync_sha="$(grep -oE '[0-9a-fA-F]{40}' <<< "$match")"
+    match="$(grep -oE 'pinned to commit `[0-9a-fA-F]{40}`( \(v[0-9]+(\.[0-9]+)+\))?' "$target/README.md" | head -n1 || true)"
+    if [[ -n "$match" ]]; then
+      readme_sync_sha="$(grep -oE '[0-9a-fA-F]{40}' <<< "$match")"
+      readme_sync_version="$(grep -oE 'v[0-9]+(\.[0-9]+)+' <<< "$match" || true)"
+    fi
   fi
   if [[ -z "$readme_sync_sha" ]]; then
     fail "README.md [readme-pin-drift]: no 'pinned to commit <sha>' mention found for inkdrafts/notiongit-sync"
   elif [[ "$readme_sync_sha" != "$workflow_sync_sha" ]]; then
     fail "README.md [readme-pin-drift]: documented notiongit-sync pin ($readme_sync_sha) does not match the workflow pin ($workflow_sync_sha)"
+  elif [[ -n "$workflow_sync_version" && "$readme_sync_version" != "$workflow_sync_version" ]]; then
+    fail "README.md [readme-pin-drift]: documented notiongit-sync version (${readme_sync_version:-none}) does not match the workflow's version comment ($workflow_sync_version)"
   fi
 fi
 
