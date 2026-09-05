@@ -4,8 +4,8 @@ on:
   schedule:
     # Offset from the top of the hour: GitHub documents that schedule events
     # queue up and can be delayed or dropped under load, and recommends
-    # avoiding :00. See "Check sync status or run it again" below for what
-    # to do if a run is late.
+    # avoiding :00. The sync-watchdog workflow re-runs this workflow if it
+    # ever goes stale; see "Check sync status or run it again" in the README.
     - cron: "4,14,24,34,44,54 * * * *"
 
   workflow_dispatch:
@@ -19,6 +19,13 @@ on:
 
 permissions:
   contents: write
+
+# Scheduled and watchdog- or manually-dispatched runs must never push
+# concurrently. Later runs queue behind the running one; at most one run is
+# pending per group, which also collapses a burst of dispatches into one.
+concurrency:
+  group: sync-notion
+  cancel-in-progress: false
 
 jobs:
   sync:
