@@ -87,6 +87,14 @@ a pin:
 5. Run `./scripts/test-hygiene.sh` and `./scripts/check-hygiene.sh` before
    opening the pull request.
 
+## Measuring sync cadence
+
+`scripts/measure-sync-cadence.sh <owner/repo> [cutover_iso8601]` pulls a live
+generated site's scheduled sync-run history and reports the gap distribution
+between consecutive runs (median, mean, p90, p99, percent over 4h). Pass a
+cutover timestamp to split the distribution into before/after and compare a
+cron change's effect, as in #29 and #33.
+
 ## Licensing and generated sites
 
 The reusable template code is released under the [MIT License](LICENSE).
