@@ -223,9 +223,9 @@ site it normally follows `https://OWNER.github.io/REPOSITORY/`.
 
 The workflow uses the reusable
 [`inkdrafts/notiongit-sync`](https://github.com/inkdrafts/notiongit-sync)
-Action, pinned to the full commit SHA of its v2.0.0 release, and needs write
-permission for repository contents. The checked-in workflow is the complete
-configuration; do not add a second sync workflow.
+Action, pinned to commit `425b414ad8080ce2d309dfcac52c94f4557e21bd` (v2.0.0),
+and needs write permission for repository contents. The checked-in workflow
+is the complete configuration; do not add a second sync workflow.
 
 ### 5. Local verification
 

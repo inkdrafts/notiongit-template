@@ -5,7 +5,8 @@
 # Rejects personal content and unsafe template artifacts: a CNAME file,
 # non-placeholder content in the sync-managed _pages/_posts/_data
 # directories, source-site identity/domain strings, private AI-assistant
-# files, obvious secret patterns, and unpinned third-party actions. Matched
+# files, obvious secret patterns, unpinned third-party actions, and a
+# README pin mention that disagrees with the workflow's actual pin. Matched
 # secret values are never printed; only the file path and rule name are
 # reported.
 #
@@ -174,6 +175,34 @@ for rel in "${TRACKED_FILES[@]}"; do
     fi
   done < "$target/$rel"
 done
+
+# 7. The README's documented pin for inkdrafts/notiongit-sync must match the
+# actual pin in the workflow, so a version bump can't update one and leave
+# the other silently disagreeing (the hygiene scan only reads workflows).
+workflow_sync_sha=""
+for rel in "${TRACKED_FILES[@]}"; do
+  case "$rel" in
+    .github/workflows/*.yml|.github/workflows/*.yaml) ;;
+    *) continue ;;
+  esac
+  while IFS= read -r line; do
+    [[ "$line" =~ uses:[[:space:]]*[\'\"]?inkdrafts/notiongit-sync@([0-9a-fA-F]{40}) ]] || continue
+    workflow_sync_sha="${BASH_REMATCH[1]}"
+  done < "$target/$rel"
+done
+
+if [[ -n "$workflow_sync_sha" ]]; then
+  readme_sync_sha=""
+  if [[ -f "$target/README.md" ]]; then
+    match="$(grep -oE 'pinned to commit `[0-9a-fA-F]{40}`' "$target/README.md" | head -n1 || true)"
+    [[ -n "$match" ]] && readme_sync_sha="$(grep -oE '[0-9a-fA-F]{40}' <<< "$match")"
+  fi
+  if [[ -z "$readme_sync_sha" ]]; then
+    fail "README.md [readme-pin-drift]: no 'pinned to commit <sha>' mention found for inkdrafts/notiongit-sync"
+  elif [[ "$readme_sync_sha" != "$workflow_sync_sha" ]]; then
+    fail "README.md [readme-pin-drift]: documented notiongit-sync pin ($readme_sync_sha) does not match the workflow pin ($workflow_sync_sha)"
+  fi
+fi
 
 if (( failures != 0 )); then
   exit 1
