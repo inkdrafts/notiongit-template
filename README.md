@@ -240,6 +240,27 @@ git diff --check
 
 The build creates `_site/`, which is ignored and should not be committed.
 
+## Security
+
+Generated repositories inherit no security settings from this template. Turn
+on secret scanning with push protection so a token pasted into your Notion
+content fails the push instead of landing in git history. Open
+**Settings → Code security**, then enable **Secret scanning** and **Push
+protection**.
+
+GitHub's scanner matches known provider token formats. Base64-encoded values
+and tokens split across multiple lines are not detected. That is GitHub's
+detection boundary.
+
+InkDrafts runs secret scanning with push protection and Dependabot alerts on
+its own repositories (`notiongit`, `notiongit-sync`, and this template) and
+restricts their GitHub Actions to an explicit allowlist. InkDrafts does not
+scan generated site content for malware. Site content lives in your
+repository, where GitHub's Acceptable Use Policy applies, as described in the
+InkDrafts [acceptable-use policy](https://inkdrafts.com/acceptable-use). That
+decision is revisited only if GitHub's enforcement proves insufficient in a
+real incident.
+
 ## Help and service status
 
 For product information and InkDrafts support, visit
