@@ -226,6 +226,21 @@ echo 'pinned to commit `0000000000000000000000000000000000000000` (v2.0.0).' > "
 stage "$dir"
 expect_fail "README pin disagrees with workflow pin" "$dir"
 
+dir="$work/readme-pin-version-drift"; clean_case "$dir"
+mkdir -p "$dir"/.github/workflows
+cat > "$dir"/.github/workflows/sync.yml <<'EOF'
+name: Sync
+on: push
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: inkdrafts/notiongit-sync@425b414ad8080ce2d309dfcac52c94f4557e21bd # v2.1.0
+EOF
+echo 'pinned to commit `425b414ad8080ce2d309dfcac52c94f4557e21bd` (v2.0.0).' > "$dir"/README.md
+stage "$dir"
+expect_fail "README version label disagrees with workflow version comment" "$dir"
+
 dir="$work/readme-pin-missing"; clean_case "$dir"
 mkdir -p "$dir"/.github/workflows
 cat > "$dir"/.github/workflows/sync.yml <<'EOF'
