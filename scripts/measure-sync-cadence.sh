@@ -7,8 +7,8 @@
 #   scripts/measure-sync-cadence.sh <owner/repo> [cutover_iso8601]
 #
 # Examples:
-#   scripts/measure-sync-cadence.sh leandro-llosa/leandro-llosa.github.io
-#   scripts/measure-sync-cadence.sh leandro-llosa/leandro-llosa.github.io 2026-09-05T19:55:27Z
+#   scripts/measure-sync-cadence.sh OWNER/REPO
+#   scripts/measure-sync-cadence.sh OWNER/REPO 2026-09-05T19:55:27Z
 set -euo pipefail
 
 REPO="${1:?usage: measure-sync-cadence.sh <owner/repo> [cutover_iso8601]}"
