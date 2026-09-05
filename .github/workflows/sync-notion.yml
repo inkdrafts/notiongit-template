@@ -48,6 +48,7 @@ jobs:
           path: ${{ runner.temp }}/run-summary.json
           if-no-files-found: ignore
           overwrite: true
+          retention-days: 30
 
       - name: Commit synced content
         if: steps.sync.outputs.changed == 'true'
