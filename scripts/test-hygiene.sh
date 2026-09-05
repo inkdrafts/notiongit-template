@@ -139,6 +139,63 @@ echo "key=AKIAABCDEFGHIJKLMNOP" > "$dir"/README.md
 stage "$dir"
 expect_fail "secret pattern inside README.md" "$dir"
 
+dir="$work/action-pin-clean"; clean_case "$dir"
+mkdir -p "$dir"/.github/workflows
+cat > "$dir"/.github/workflows/ci.yml <<'EOF'
+name: CI
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: ./.github/actions/local
+EOF
+stage "$dir"
+expect_pass "pinned and local action refs" "$dir"
+
+dir="$work/action-pin-unpinned"; clean_case "$dir"
+mkdir -p "$dir"/.github/workflows
+cat > "$dir"/.github/workflows/ci.yml <<'EOF'
+name: CI
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+EOF
+stage "$dir"
+expect_fail "unpinned third-party action ref" "$dir"
+
+dir="$work/action-pin-no-comment"; clean_case "$dir"
+mkdir -p "$dir"/.github/workflows
+cat > "$dir"/.github/workflows/ci.yml <<'EOF'
+name: CI
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+EOF
+stage "$dir"
+expect_fail "pinned action ref without version comment" "$dir"
+
+dir="$work/action-pin-nonversion-comment"; clean_case "$dir"
+mkdir -p "$dir"/.github/workflows
+cat > "$dir"/.github/workflows/ci.yml <<'EOF'
+name: CI
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # see docs
+EOF
+stage "$dir"
+expect_fail "pinned action ref with non-version comment" "$dir"
+
 if (( failures != 0 )); then
   echo "hygiene fixture tests failed" >&2
   exit 1
