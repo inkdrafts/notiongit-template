@@ -148,7 +148,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/local
 EOF
 stage "$dir"
@@ -177,7 +177,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 EOF
 stage "$dir"
 expect_fail "pinned action ref without version comment" "$dir"
@@ -191,7 +191,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # see docs
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # see docs
 EOF
 stage "$dir"
 expect_fail "pinned action ref with non-version comment" "$dir"
