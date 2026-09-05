@@ -30,7 +30,8 @@ preserving the copyright and license notice and honoring third-party terms.
 1. Open the Pages or Posts database in your connected Notion workspace.
 2. Edit a row while its `Status` is `Draft`.
 3. When it is ready, change `Status` to `Published`.
-4. Wait for the next sync. The scheduled sync runs about every ten minutes.
+4. Wait for the next sync, or trigger one now (see "Check sync status or run
+   it again" below).
 5. Open the live-site link shown in your repository's **Settings → Pages**.
 
 Posts use `Publish Date` to control their date; if it is blank, the sync uses
@@ -38,10 +39,12 @@ today's date. A page or post can be published without being added to the
 navigation; for pages, check `Show in Nav` when you want it in the header. Keep
 each `Slug` unique and URL-safe because it becomes part of the page URL.
 
-The first sync may take a little longer than ten minutes because GitHub must
-run the Action and rebuild the Pages site. A scheduled run can also be delayed
-by GitHub Actions. The repository remains the source of truth for the site,
-and it continues to work if InkDrafts is unavailable after provisioning.
+GitHub Actions attempts a sync every 10 minutes, but under load GitHub can
+delay or skip a scheduled run by hours rather than minutes. Don't wait on a
+fixed clock: open the **Actions** tab to see the latest run, or select **Run
+workflow** to sync immediately. The repository remains the source of truth
+for the site, and it continues to work if InkDrafts is unavailable after
+provisioning.
 
 ### What the sync changes
 

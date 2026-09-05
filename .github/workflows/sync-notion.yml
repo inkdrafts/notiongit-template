@@ -2,7 +2,11 @@ name: Sync Notion → Jekyll
 
 on:
   schedule:
-    - cron: "*/10 * * * *"
+    # Offset from the top of the hour: GitHub documents that schedule events
+    # queue up and can be delayed or dropped under load, and recommends
+    # avoiding :00. See "Check sync status or run it again" below for what
+    # to do if a run is late.
+    - cron: "4,14,24,34,44,54 * * * *"
 
   workflow_dispatch:
     inputs:
