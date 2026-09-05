@@ -30,8 +30,11 @@ preserving the copyright and license notice and honoring third-party terms.
 1. Open the Pages or Posts database in your connected Notion workspace.
 2. Edit a row while its `Status` is `Draft`.
 3. When it is ready, change `Status` to `Published`.
-4. Wait for the next sync, or trigger one now (see "Check sync status or run
-   it again" below).
+4. To publish now, open the **Actions** tab, choose **Sync Notion → Jekyll**,
+   select **Run workflow**, and run it with `allow_bulk_delete` off. A manual
+   run starts right away instead of waiting in GitHub's schedule queue, and
+   the site updates a few minutes after it finishes. Otherwise the scheduled
+   sync picks the change up on its own.
 5. Open the live-site link shown in your repository's **Settings → Pages**.
 
 Posts use `Publish Date` to control their date; if it is blank, the sync uses
@@ -40,11 +43,13 @@ navigation; for pages, check `Show in Nav` when you want it in the header. Keep
 each `Slug` unique and URL-safe because it becomes part of the page URL.
 
 GitHub Actions attempts a sync every 10 minutes, but under load GitHub can
-delay or skip a scheduled run by hours rather than minutes. Don't wait on a
-fixed clock: open the **Actions** tab to see the latest run, or select **Run
-workflow** to sync immediately. The repository remains the source of truth
-for the site, and it continues to work if InkDrafts is unavailable after
-provisioning.
+delay or skip a scheduled run by hours rather than minutes, so the schedule
+is best-effort. A second workflow, **Sync watchdog**, backs it up: whenever
+the last sync attempt is more than about 90 minutes old, the watchdog starts
+a fresh sync for you. Even so, don't wait on a fixed clock: open the
+**Actions** tab to see the latest run, or select **Run workflow** to sync
+immediately. The repository remains the source of truth for the site, and it
+continues to work if InkDrafts is unavailable after provisioning.
 
 ### What the sync changes
 
@@ -66,10 +71,17 @@ manually maintaining the site.
 Open the repository's **Actions** tab and choose **Sync Notion → Jekyll**.
 Each run shows whether content changed and includes a short run summary.
 
-To sync immediately, select **Run workflow** on that workflow. Leave
-`allow_bulk_delete` turned off for normal use. The workflow is also available
-as a scheduled run, so a manual run is usually only needed after an important
-publish or when troubleshooting.
+To sync now, select **Run workflow** and start it with `allow_bulk_delete`
+turned off. A manual run starts right away instead of waiting in GitHub's
+schedule queue, so use it after publishing something you want live. When a
+scheduled run goes missing instead, the **Sync watchdog** workflow notices
+and re-runs the sync for you within about 90 minutes.
+
+If syncs ever stop entirely after a long quiet period, check whether GitHub
+disabled the repository's scheduled workflows: GitHub turns them off
+automatically after 60 days without repository activity, and a Notion-only
+publishing flow can go that long without a commit. Re-enabling them is a
+one-click action on the **Actions** screen.
 
 If a run is red, open the run and read the failed step. A missing token or
 database ID is treated as a safe, green no-op before any files are changed;
@@ -227,8 +239,12 @@ site it normally follows `https://OWNER.github.io/REPOSITORY/`.
 The workflow uses the reusable
 [`inkdrafts/notiongit-sync`](https://github.com/inkdrafts/notiongit-sync)
 Action, pinned to commit `425b414ad8080ce2d309dfcac52c94f4557e21bd` (v2.0.0),
-and needs write permission for repository contents. The checked-in workflow
-is the complete configuration; do not add a second sync workflow.
+and needs write permission for repository contents. The checked-in workflows
+are the complete configuration: `sync-notion.yml` performs every sync, and
+`sync-watchdog.yml` only re-triggers it when the schedule stalls. It has no
+Notion access and cannot write site files. Do not add your own sync
+workflows: a second path writing site content cannot conflict-check against
+Notion the way the sync's bulk-delete protection does.
 
 ### 5. Local verification
 
