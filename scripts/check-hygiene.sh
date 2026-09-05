@@ -5,8 +5,9 @@
 # Rejects personal content and unsafe template artifacts: a CNAME file,
 # non-placeholder content in the sync-managed _pages/_posts/_data
 # directories, source-site identity/domain strings, private AI-assistant
-# files, and obvious secret patterns. Matched secret values are never
-# printed; only the file path and rule name are reported.
+# files, obvious secret patterns, and unpinned third-party actions. Matched
+# secret values are never printed; only the file path and rule name are
+# reported.
 #
 # Only tracked (or staged) files are scanned, matching what a checkout of
 # the repository actually ships — the same scope scripts/check-neutral-config.sh
@@ -144,6 +145,34 @@ for rel in "${TRACKED_FILES[@]}"; do
       fail "$rel [$rule_name]: possible secret detected (value withheld)"
     fi
   done
+done
+
+# 6. Third-party actions and reusable workflows are pinned to a full commit
+# SHA: the sync workflow runs with contents:write, so a moved upstream tag
+# executes attacker code with those permissions. Local ./ refs are this
+# repository and carry no upstream to move.
+USES_LINE_RE='^[[:space:]]*(-[[:space:]]+)?uses:[[:space:]]*([^[:space:]]+)(.*)$'
+VERSION_COMMENT_RE='#[[:space:]]*v?[0-9]+(\.[0-9]+)+'
+quote="'"
+for rel in "${TRACKED_FILES[@]}"; do
+  case "$rel" in
+    .github/workflows/*.yml|.github/workflows/*.yaml) ;;
+    *) continue ;;
+  esac
+  while IFS= read -r line; do
+    [[ "$line" =~ $USES_LINE_RE ]] || continue
+    value="${BASH_REMATCH[2]}"
+    rest="${BASH_REMATCH[3]}"
+    value="${value%\"}"; value="${value#\"}"
+    value="${value%$quote}"; value="${value#$quote}"
+    [[ "$value" == ./* ]] && continue
+    ref="${value##*@}"
+    if [[ ! "$ref" =~ ^[0-9a-fA-F]{40}$ ]]; then
+      fail "$rel [action-pin]: uses: '$value' must be pinned to a full 40-hex commit SHA"
+    elif [[ ! "$rest" =~ $VERSION_COMMENT_RE ]]; then
+      fail "$rel [action-pin]: uses: '$value' is pinned but has no version comment (expected '@<sha> # vX.Y.Z')"
+    fi
+  done < "$target/$rel"
 done
 
 if (( failures != 0 )); then
