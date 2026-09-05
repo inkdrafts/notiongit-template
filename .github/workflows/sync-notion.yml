@@ -23,11 +23,11 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
       - name: Sync from Notion
         id: sync
-        uses: inkdrafts/notiongit-sync@v2
+        uses: inkdrafts/notiongit-sync@425b414ad8080ce2d309dfcac52c94f4557e21bd # v2.0.0
         with:
           notion_token: ${{ secrets.NOTION_TOKEN }}
           pages_database_id: ${{ secrets.NOTION_PAGES_DATABASE_ID }}
@@ -42,7 +42,7 @@ jobs:
       # channel is observational, so a missing file must never fail this job.
       - name: Upload run summary
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: notiongit-run-summary
           path: ${{ runner.temp }}/run-summary.json
