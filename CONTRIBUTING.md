@@ -46,6 +46,47 @@ JavaScript. Jekyll extensions must be available in GitHub Pages safe mode and
 must be declared through the `github-pages`-compatible dependency set in the
 `Gemfile`; do not add custom Ruby plugins.
 
+## Bumping a pinned action
+
+Every third-party `uses:` in `.github/workflows/` is pinned to a full 40-hex
+commit SHA with a `# vX.Y.Z` comment; the hygiene scan's `action-pin` rule
+fails the build otherwise, because the sync workflow runs with
+`contents: write` and a moved tag would execute with that permission. To bump
+a pin:
+
+1. Resolve the new release's commit SHA from the GitHub API, not from the tag
+   name alone:
+
+   ```sh
+   gh api repos/OWNER/REPO/git/refs/tags/vX.Y.Z --jq '.object.sha'
+   ```
+
+   If the tag is annotated (`"type": "tag"` in the response), resolve the
+   commit it points at:
+
+   ```sh
+   gh api repos/OWNER/REPO/git/tags/<sha-from-above> --jq '.object.sha'
+   ```
+
+2. Cross-check that SHA against `git ls-remote`'s peeled ref, which always
+   resolves to the commit even for an annotated tag:
+
+   ```sh
+   git ls-remote https://github.com/OWNER/REPO vX.Y.Z^{}
+   ```
+
+   Only use the SHA once both commands agree.
+
+3. Update the `uses:` line's SHA and its `# vX.Y.Z` comment in the same edit
+   so they can't disagree mid-review.
+
+4. If the action is `inkdrafts/notiongit-sync`, also update the matching
+   "pinned to commit `<sha>`" mention in README.md. The hygiene scan's
+   `readme-pin-drift` rule fails the build if the two disagree.
+
+5. Run `./scripts/test-hygiene.sh` and `./scripts/check-hygiene.sh` before
+   opening the pull request.
+
 ## Licensing and generated sites
 
 The reusable template code is released under the [MIT License](LICENSE).

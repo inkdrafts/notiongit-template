@@ -196,6 +196,51 @@ EOF
 stage "$dir"
 expect_fail "pinned action ref with non-version comment" "$dir"
 
+dir="$work/readme-pin-match"; clean_case "$dir"
+mkdir -p "$dir"/.github/workflows
+cat > "$dir"/.github/workflows/sync.yml <<'EOF'
+name: Sync
+on: push
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: inkdrafts/notiongit-sync@425b414ad8080ce2d309dfcac52c94f4557e21bd # v2.0.0
+EOF
+echo 'pinned to commit `425b414ad8080ce2d309dfcac52c94f4557e21bd` (v2.0.0).' > "$dir"/README.md
+stage "$dir"
+expect_pass "README pin matches workflow pin" "$dir"
+
+dir="$work/readme-pin-drift"; clean_case "$dir"
+mkdir -p "$dir"/.github/workflows
+cat > "$dir"/.github/workflows/sync.yml <<'EOF'
+name: Sync
+on: push
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: inkdrafts/notiongit-sync@425b414ad8080ce2d309dfcac52c94f4557e21bd # v2.0.0
+EOF
+echo 'pinned to commit `0000000000000000000000000000000000000000` (v2.0.0).' > "$dir"/README.md
+stage "$dir"
+expect_fail "README pin disagrees with workflow pin" "$dir"
+
+dir="$work/readme-pin-missing"; clean_case "$dir"
+mkdir -p "$dir"/.github/workflows
+cat > "$dir"/.github/workflows/sync.yml <<'EOF'
+name: Sync
+on: push
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: inkdrafts/notiongit-sync@425b414ad8080ce2d309dfcac52c94f4557e21bd # v2.0.0
+EOF
+echo 'No pin mention here.' > "$dir"/README.md
+stage "$dir"
+expect_fail "README missing the pin mention entirely" "$dir"
+
 if (( failures != 0 )); then
   echo "hygiene fixture tests failed" >&2
   exit 1
